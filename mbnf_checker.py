@@ -11,7 +11,7 @@ def mbnf_2_ebnf(fh):
 	"""
 	mbnf = fh.read()
 	symbol_reg = r'[\n\s]*([a-zA-Z0-9]+)[\s\n]*'
-	rhs_reg = r'[\n\s]*([a-zA-Z0-9]+)([a-zA-Z0-9 ]*)\n*'
+	rhs_reg = r'[\n\s]*([a-zA-Z0-9]+)([a-zA-Z0-9\s]*)\n*'
 	ir = []
 	mbnf = re.sub(re.compile("//.*?\n" ) ,"" ,mbnf)
 	plist = mbnf.split(';')
@@ -24,7 +24,10 @@ def mbnf_2_ebnf(fh):
 			rhs_rep = []
 			for rhs in rhss:
 				match = re.match(rhs_reg, rhs)
-				rhs_rep.append(match.group(1) + match.group(2))
+				str = match.group(1) + match.group(2)
+				str = str.replace('\n', '')
+				re.sub('[\s\t]+', ' ', str)
+				rhs_rep.append(str)
 			new_rep = "%s -> %s" %(lhs, ' | '.join(rhs_rep))
 			ir.append(new_rep)
 	ebnf = re.sub(r'epsilon', r'EPSILON', '\n'.join(ir), flags=re.IGNORECASE)
@@ -182,7 +185,6 @@ def check_answer(grammar_path, student_folder):
 		if not compare_answer(answer_student, answer_web):
 			print "The ebnf form: "
 			print mbnf_2_ebnf(read(f))
-		f.close()
 		print "=========================="
 
 
